@@ -17,6 +17,8 @@
   - 웹서버로 request를 보내면 이미지가 반환되는 형식
   - [Project mazassumnida](https://github.com/mazassumnida/mazassumnida)의 방식을 참고하는 것이 좋을 듯
 - 디자인 어케 하지
+  - 옵션1: 작혼 느낌 살려서
+  - 옵션2: 모던한 느낌으로
 
 ### 백
 
@@ -28,6 +30,7 @@
     - 작혼 서버와는 WebSocket을 사용하여 통신해야 할 듯
     - 통신 시 Google의 protobuf를 사용하여 메시지 wrapping/unwrapping이 이뤄짐
     - protobuf에 의한 메시지 wrapping 구조는 가지고 있음
+    - 작혼 전적 사이트 깃허브 참고할 것
   - 형식 정해지는 대로 해당 형식 렌더링하는 기능 필요
 - DB
   - request를 보내지 않고도 같은 데이터를 계속 반환하려면 DB에 관련 데이터 저장이 불가피
