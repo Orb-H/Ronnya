@@ -1,0 +1,9 @@
+services:
+  backend:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    ports:
+      - ${PORT}:${PORT}
+
+    
