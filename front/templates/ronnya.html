@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% if isEmpty %}
+        <div>이름을 입력해주세요</div>
+    {% endif %}
+    <form action="{% url 'makeimg' %}" method>
+        <input name="name" placeholder="이름"/>
+        <button type="submit">입력</button>
+    </form>
+{% endblock %}
