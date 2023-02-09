@@ -1,9 +1,39 @@
+version: '1'
 services:
-  backend:
+  nginx:
+    container_name: nginx
+    image: ronnya/nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./back:/usr/src/back
+      - ./front:/usr/src/front
+      - ./log:/var/log/nginx
+    
+  back:
+    container_name: back
+    image: ronnya/back
     build:
       context: ./back
       dockerfile: Dockerfile
-    ports:
-      - ${PORT}:${PORT}
+    restart: always
+    command: uwsgi --ini uwsgi.ini
+    volumes:
+      - ./back:/usr/src/back
+      - ./log:/var/log/uwsgi/back
 
-    
+  front:
+    container_name: front
+    image: ronnya/front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    restart: always
+    command: uwsgi --ini uwsgi.ini
+    volumes:
+      - ./front:/usr/src/front
+      - ./log:/var/log/uwsgi/front
