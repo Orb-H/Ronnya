@@ -1,11 +1,13 @@
-FROM node:lts-alpine
+FROM python:latest
 
-WORKDIR /usr/src/app
+LABEL maintainer="playjnj@khu.ac.kr"
 
-COPY package*.json ./
+RUN mkdir /usr/src/back
+ADD . /usr/src/back
 
-RUN npm i
+WORKDIR /usr/src/back
 
-COPY . .
+COPY requirements.txt .
 
-CMD [ "npm" , "run" , "start" ]
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
