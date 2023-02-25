@@ -14,7 +14,7 @@ def makeimg(request):
         data={
             "name" : name
         }
-        res=requests.get("http://58.123.175.31/api",data=data);
+        res=requests.get("http://host.docker.internal/api",params=data);
         svg='''
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="400" height="180">
             <g>
