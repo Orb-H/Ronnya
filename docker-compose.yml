@@ -25,6 +25,8 @@ services:
     volumes:
       - ./back:/usr/src/back
       - ./log:/var/log/uwsgi/back
+    environment:
+      - SECRET_KEY=$(BACK_SECRET_KEY)
 
   front:
     container_name: front
@@ -37,3 +39,5 @@ services:
     volumes:
       - ./front:/usr/src/front
       - ./log:/var/log/uwsgi/front
+    environment:
+    - SECRET_KEY=$(FRONT_SECRET_KEY)
