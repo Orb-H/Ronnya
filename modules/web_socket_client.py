@@ -83,20 +83,20 @@ class WebSocketClient:
 
     async def login(self, code: str, uid: str, login_type: int, version: str, version_str: str) -> bool:
         # LOGIN: OAuth2Auth -> OAuth2Check -> OAuth2Login
-        print('Send Oauth2Auth')
+        self.log('Send Oauth2Auth')
         response = await self.send_oauth2auth_msg(8, code, uid, version_str)
         assert 'access_token' in response.keys(), 'Oauth2Auth Failed'
         access_token = response['access_token']
-        print('Done Oauth2Auth: access_token = ' + access_token)
+        self.log('Done Oauth2Auth: access_token = ' + access_token)
 
-        print('Send Oauth2Check')
+        self.log('Send Oauth2Check')
         response = await self.send_oauth2check_msg(login_type, access_token)
         assert 'has_account' in response.keys(), 'Oauth2Check Failed'
         has_account = response['has_account']
-        print('Done Oauth2Check: has_account = ' + str(has_account))
+        self.log('Done Oauth2Check: has_account = ' + str(has_account))
         assert has_account, ('No account found with uid ' + uid)
 
-        print('Send Oauth2Login')
+        self.log('Send Oauth2Login')
         response = await self.send_oauth2login_msg(login_type, access_token, version, version_str)
         assert 'account_id' in response.keys(), 'Oauth2Login Failed'
         account_id = response['account_id']
@@ -116,17 +116,17 @@ class WebSocketClient:
 
     async def find_user(self, fid: str) -> dict:
         # INFO_QUERY: searchAccountByPattern -> fetchMultiAccountBrief
-        print('Send SearchAccountByPattern')
+        self.log('Send SearchAccountByPattern')
         response = await self.send_searchaccountbypattern_msg(fid)
         assert 'decode_id' in response, 'No account found'
         uid = response['decode_id']
-        print('Done SearchAccountByPattern: decode_id = ' + str(uid))
+        self.log('Done SearchAccountByPattern: decode_id = ' + str(uid))
 
-        print('Send FetchMultiAccountBrief')
+        self.log('Send FetchMultiAccountBrief')
         response = await self.send_fetchmultiaccountbrief_msg(uid)
         assert 'players' in response, 'No user information found'
-        print('Done FetchMultiAccountBrief: user information ↓')
-        print(response['players'])
+        self.log('Done FetchMultiAccountBrief: user information ↓')
+        self.log(response['players'])
         return response['players']
 
     async def close(self):
