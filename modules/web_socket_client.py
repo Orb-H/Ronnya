@@ -1,4 +1,5 @@
 import asyncio
+import aioconsole
 import websockets
 import lq_proto_util
 import lq_proto_pb2
@@ -189,7 +190,7 @@ async def main():
         await client.login(access_token, uid, 8, version, version_str)
 
         while True:
-            fid = input('> ')
+            fid = await aioconsole.ainput('> ')
             if len(fid) == 0:
                 break
             print((await client.find_user(fid))['nickname'])
