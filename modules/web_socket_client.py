@@ -154,8 +154,7 @@ async def main():
 
         client = WebSocketClient()
         print('Intialize connection')
-        resp = await client.connect()
-        assert len(resp) == 0, "Error at heatbeat: " + resp
+        await client.connect()
         print('First heatbeat complete')
 
         print('Attempt to login')
