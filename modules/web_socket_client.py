@@ -99,7 +99,7 @@ class WebSocketClient:
         self.log('Send Oauth2Login')
         response = await self.send_oauth2login_msg(login_type, access_token, version, version_str)
         assert 'account_id' in response.keys(), 'Oauth2Login Failed'
-        account_id = response['account_id']
+        self.log('Done Oauth2Login')
 
     async def send_searchaccountbypattern_msg(self, fid: str) -> dict:
         return await self.send_type_msg({
@@ -141,6 +141,7 @@ class WebSocketClient:
 
 async def main():
     print('----- Manual Mode -----')
+    print('Enter fid to find user, leave blank to quit')
     try:
         f = open('.ws_client.sock', 'w')
 
