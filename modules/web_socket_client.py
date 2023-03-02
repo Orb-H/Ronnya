@@ -126,8 +126,10 @@ class WebSocketClient:
         response = await self.send_fetchmultiaccountbrief_msg(uid)
         assert 'players' in response, 'No user information found'
         self.log('Done FetchMultiAccountBrief: user information ↓')
-        self.log(response['players'])
-        return response['players']
+
+        info = response['players'][0]
+        self.log(str(info))
+        return info
 
     async def close(self):
         return await self.client.close()
@@ -162,7 +164,7 @@ async def main():
             fid = input('> ')
             if len(fid) == 0:
                 break
-            print((await client.find_user(fid))[0]['nickname'])
+            print((await client.find_user(fid))['nickname'])
         await client.close()
     except Exception as e:
         print(type(e))
