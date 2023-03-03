@@ -11,8 +11,6 @@ class RonnyaDB:
         self.session = pymysql.connect(host=os.getenv('db_host'), user=os.getenv('db_user'), password=os.getenv('db_password'), charset='utf8')
         self.cur = self.session.cursor()
 
-        self.wsc = web_socket_client.WebSocketClient()
-
         self.cur.execute('SHOW DATABASES')
         databases = [x[0] for x in self.cur.fetchall()]
         if 'ronnya' not in databases:
@@ -26,12 +24,25 @@ class RonnyaDB:
 
         if 'uid_info' not in tables:
             self.log('User ID information table not found. Creating... ', end='')
-            self.cur.execute('CREATE TABLE uid_info (fid VARCHAR(20) PRIMARY KEY, uid BIGINT UNIQUE NOT NULL)')
+            self.cur.execute('\
+                CREATE TABLE uid_info (\
+                fid VARCHAR(20) PRIMARY KEY, \
+                uid BIGINT UNIQUE NOT NULL)')
             print('Done')
         if 'rank_info' not in tables:
             self.log('Rank information table not found. Creating... ', end='')
-            self.cur.execute('CREATE TABLE rank_info (fid VARCHAR(20) PRIMARY KEY, name VARCHAR(20) NOT NULL, rank4 INT NOT NULL, point4 INT NOT NULL, rank3 INT NOT NULL, point3 INT NOT NULL, last_update DATETIME DEFAULT NOW())')
+            self.cur.execute('\
+                CREATE TABLE rank_info (\
+                fid VARCHAR(20) PRIMARY KEY,\
+                name VARCHAR(20) NOT NULL,\
+                rank4 INT NOT NULL,\
+                point4 INT NOT NULL,\
+                rank3 INT NOT NULL,\
+                point3 INT NOT NULL,\
+                last_update DATETIME DEFAULT NOW())')
             print('Done')
+        
+        self.wsc = web_socket_client.WebSocketClient()
         
         self.log('Initialization done.')
     
@@ -44,26 +55,28 @@ class RonnyaDB:
             dict: information about user
         '''
         self.log('(FID: '+ fid + ') Checking existence in DB...')
-        query = 'SELECT * FROM uid_table WHERE fid = ' + fid
-        self.cur.execute(query)
+        query = 'SELECT * FROM uid_table WHERE fid = %s'
+        self.cur.execute(query,(fid))
         result = self.cur.fetchall()
 
         if len(result) == 0:
             self.log('(FID: ' + fid + ') Not found. Sending request for data.')
+            self.wsc.find_user(fid)
             ### calling websocket to get data ###
             ### Return value: uid, name, rank4, point4, rank3, point3 ###
-            # query = 'INSERT INTO uid_table VALUES (' + fid + ',' + uid  + ')'
-            # self.cur.execute(query)
+            # query = 'INSERT INTO uid_table VALUES (%s,%s)'
+            # self.cur.execute(query,(fid,uid))
+            self.session.commit()
             self.log('(FID: ' + fid + ') Added data to DB.')
         else:
             self.log('(FID: ' + fid + ') Found. Checking update time...')
             
-            # query = 'SELECT * FROM rank_tables where fud = ' + fid
-            # self.cur.execute(query)
+            # query = 'SELECT * FROM rank_info where fid = %s'
+            # self.cur.execute(query,(fid))
             # result = self.cur.fetchall()
             
-            # query = 'UPDATE rank_tables SET ... WHERE fid = ' + fid
-            # self.cur.execute(query)
+            # query = 'UPDATE rank_info SET ... WHERE fid = %s'
+            # self.cur.execute(query,(fid))
 
     def log(self, msg: str, **print_options) -> None:
         print('[' + dt.datetime.now().isoformat() + '] ' + msg, **print_options)
@@ -82,6 +95,6 @@ if __name__ == '__main__':
         if cmd[0] == 'stop':
             break
         elif cmd[0] in commands.keys():
-            commands[cmd[0]][cmd[1:]]
+            commands[cmd[0]](str(cmd[1]))
         else:
             print('No such command: ' + cmd[0])
