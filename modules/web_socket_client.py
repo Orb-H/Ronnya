@@ -1,32 +1,60 @@
 import asyncio
+import aioconsole
 import websockets
 import lq_proto_util
 import lq_proto_pb2
 import datetime
 import os
 import uuid
-import json
+
+import threading
 
 import getData
 
 
 class WebSocketClient:
+    class HeatbeatTimer:
+        def __init__(self, func, log):
+            self.keep_sending = False
+            self.func = func
+            self.log = log
+            self.task = None
+
+        def start(self):
+            self.keep_sending = True
+            self.task = asyncio.create_task(self.callback(), name='heatbeat')
+            asyncio.shield(self.task)
+
+        def stop(self):
+            self.task.cancel()
+            self.keep_sending = False
+
+        async def callback(self):
+            while True:
+                await asyncio.sleep(360)
+                await self.func()
+                self.log('Heatbeat sent\n> ', end='')
+
     def __init__(self):
         self.index = 1
+        self.lock = threading.Lock()
 
     async def connect(self):
         self.client = await websockets.connect(os.getenv('ws_server_addr_jp'))
+        self.ht = WebSocketClient.HeatbeatTimer(self.send_heatbeat, self.log)
+        self.ht.start()
         return await self.send_heatbeat()
 
     async def send_msg(self, msg: bytes, type: str) -> bytes:
         wrapped = lq_proto_util.wrap_root_msg(msg, type, self.index)
         self.index += 1
-        await self.client.send(wrapped)
 
+        self.lock.acquire()
+        await self.client.send(wrapped)
         resp = await self.client.recv()
-        # print(resp)
+        self.lock.release()
+
         unwrapped = lq_proto_util.unwrap_root_msg(resp)
-        # print(unwrapped)
         return unwrapped
 
     async def send_type_msg(self, msg: dict, type: str) -> bytes:
@@ -135,6 +163,7 @@ class WebSocketClient:
         return info
 
     async def close(self):
+        self.ht.stop()
         return await self.client.close()
 
     def log(self, msg: str, **print_options) -> None:
@@ -164,7 +193,7 @@ async def main():
         await client.login(access_token, uid, 8, version, version_str)
 
         while True:
-            fid = input('> ')
+            fid = await aioconsole.ainput('> ')
             if len(fid) == 0:
                 break
             print((await client.find_user(fid))['nickname'])
