@@ -100,9 +100,8 @@ class WebSocketClient:
         self.log('Send Oauth2Login')
         response = await self.send_oauth2login_msg(login_type, access_token, version, version_str)
         assert 'account_id' in response.keys(), 'Oauth2Login Failed'
-        account_id = response['account_id']
-        self.log('Done Oauth2Login: account_id = ' + str(account_id))
-        self.log('Login done.')
+
+        self.log('Done Oauth2Login')
 
     async def send_searchaccountbypattern_msg(self, fid: str) -> dict:
         return await self.send_type_msg({
@@ -129,9 +128,11 @@ class WebSocketClient:
         response = await self.send_fetchmultiaccountbrief_msg(uid)
         assert 'players' in response, 'No user information found'
         self.log('Done FetchMultiAccountBrief: user information ↓')
-        players=json.dumps(response['players'])
-        self.log(players)
-        return response['players'][0]
+
+
+        info = response['players'][0]
+        self.log(str(info))
+        return info
 
     async def close(self):
         return await self.client.close()
@@ -143,6 +144,7 @@ class WebSocketClient:
 
 async def main():
     print('----- Manual Mode -----')
+    print('Enter fid to find user, leave blank to quit')
     try:
         f = open('.ws_client.sock', 'w')
 
@@ -155,8 +157,7 @@ async def main():
 
         client = WebSocketClient()
         print('Intialize connection')
-        resp = await client.connect()
-        assert len(resp) == 0, "Error at heatbeat: " + resp
+        await client.connect()
         print('First heatbeat complete')
 
         print('Attempt to login')
