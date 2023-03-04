@@ -135,7 +135,7 @@ class WebSocketClient:
             'pattern': fid
         }, 'searchAccountByPattern')
 
-    async def send_fetchmultiaccountbrief_msg(self, uid: str) -> dict:
+    async def send_fetchmultiaccountbrief_msg(self, uid: int) -> dict:
         request = lq_proto_pb2.ReqMultiAccountId(**{
             'account_id_list': [uid]
         })
