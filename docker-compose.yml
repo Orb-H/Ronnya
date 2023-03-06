@@ -1,4 +1,4 @@
-version: '1'
+version: '1.1'
 services:
   nginx:
     container_name: nginx
@@ -10,21 +10,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./back:/usr/src/back
       - ./front:/usr/src/front
       - ./log:/var/log/nginx
-    
-  back:
-    container_name: back
-    image: ronnya/back
-    build:
-      context: ./back
-      dockerfile: Dockerfile
-    restart: always
-    command: uwsgi --ini uwsgi.ini
-    volumes:
-      - ./back:/usr/src/back
-      - ./log:/var/log/uwsgi/back
 
   front:
     container_name: front
@@ -37,3 +24,5 @@ services:
     volumes:
       - ./front:/usr/src/front
       - ./log:/var/log/uwsgi/front
+    environment:
+    - SECRET_KEY=$(FRONT_SECRET_KEY)
