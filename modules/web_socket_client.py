@@ -38,6 +38,10 @@ class WebSocketClient:
         self.index = 1
         self.lock = threading.Lock()
 
+        assert not os.path.isfile('.ws_client.lock'), 'Other instance already running...'
+
+        self.file = open('.ws_client.lock', 'w')
+
     async def connect(self):
         self.client = await websockets.connect(os.getenv('ws_server_addr_jp'))
         self.ht = WebSocketClient.HeatbeatTimer(self.send_heatbeat, self.log)
@@ -160,6 +164,8 @@ class WebSocketClient:
         return info
 
     async def close(self):
+        self.file.close()
+        os.remove('.ws_client.lock')
         self.ht.stop()
         return await self.client.close()
 
@@ -172,8 +178,6 @@ async def main():
     print('----- Manual Mode -----')
     print('Enter fid to find user, leave blank to quit')
     try:
-        f = open('.ws_client.sock', 'w')
-
         uid = os.getenv('ronnya_uid')
         token = os.getenv('ronnya_token')
         access_token = getData.GetToken(uid, token)['accessToken']
@@ -199,9 +203,6 @@ async def main():
         print(type(e))
         print(e.args)
         print(e)
-    finally:
-        f.close()
-        os.remove('.ws_client.sock')
 
 if __name__ == "__main__":
     asyncio.run(main())
