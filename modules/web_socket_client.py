@@ -152,7 +152,7 @@ class WebSocketClient:
         # INFO_QUERY: searchAccountByPattern -> fetchMultiAccountBrief
         self.log('Send SearchAccountByPattern')
         response = await self.send_searchaccountbypattern_msg(fid)
-        assert 'decode_id' in response, 'No account found'
+        assert response['decode_id'] != 0, 'No account found'
         uid = response['decode_id']
         self.log('Done SearchAccountByPattern: decode_id = ' + str(uid))
 
