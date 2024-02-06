@@ -114,8 +114,12 @@ class WebSocketClient:
         response = await self.send_msg(request.SerializeToString(), '.lq.Lobby.oauth2Login')
         return lq_proto_util.unwrap_msg(response, 'ResLogin')
 
-    async def login(self, code: str, uid: str, login_type: int, version: str, version_str: str) -> bool:
+    async def login(self, token: str, uid: str, login_type: int) -> bool:
         # LOGIN: OAuth2Auth -> OAuth2Check -> OAuth2Login
+        code = getData.GetToken(uid, token)['accessToken']
+        version = getData.GetVersion()['version']
+        version_str = 'web-' + '.'.join(version.split('.')[:-1])
+        
         self.log('Send Oauth2Auth')
         response = await self.send_oauth2auth_msg(8, code, uid, version_str)
         assert 'access_token' in response.keys(), 'Oauth2Auth Failed'
@@ -183,10 +187,6 @@ async def main():
     try:
         uid = os.getenv('ronnya_uid')
         token = os.getenv('ronnya_token')
-        access_token = getData.GetToken(uid, token)['accessToken']
-
-        version = getData.GetVersion()['version']
-        version_str = 'web-' + '.'.join(version.split('.')[:-1])
 
         client = WebSocketClient()
         print('Intialize connection')
@@ -194,7 +194,7 @@ async def main():
         print('First heatbeat complete')
 
         print('Attempt to login')
-        await client.login(access_token, uid, 8, version, version_str)
+        await client.login(token, uid, 8)
 
         while True:
             fid = await aioconsole.ainput('> ')
