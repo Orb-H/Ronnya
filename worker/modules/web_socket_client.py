@@ -12,6 +12,8 @@ import threading
 import getData
 
 
+LANG = 'jp'
+
 class WebSocketClient:
     class HeatbeatTimer:
         def __init__(self, func, log):
@@ -44,7 +46,7 @@ class WebSocketClient:
         self.file = open('.ws_client.lock', 'w')
 
     async def connect(self):
-        self.client = await websockets.connect(os.getenv('ws_server_addr_jp'))
+        self.client = await websockets.connect(os.getenv('_'.join(['ws_server_addr', LANG])))
         self.ht = WebSocketClient.HeatbeatTimer(self.send_heatbeat, self.log)
         self.ht.start()
         return await self.send_heatbeat()
@@ -185,8 +187,8 @@ async def main():
     print('----- Manual Mode -----')
     print('Enter fid to find user, leave blank to quit')
     try:
-        uid = os.getenv('ronnya_uid')
-        token = os.getenv('ronnya_token')
+        uid = os.getenv('_'.join(['ronnya_uid', LANG]))
+        token = os.getenv('_'.join(['ronnya_token', LANG]))
 
         client = WebSocketClient()
         print('Intialize connection')
