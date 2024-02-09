@@ -6,6 +6,7 @@ import lq_proto_pb2
 import datetime
 import os
 import uuid
+import logging
 
 import threading
 
@@ -177,8 +178,7 @@ class WebSocketClient:
         return await self.client.close()
 
     def log(self, msg: str, **print_options) -> None:
-        print('[' + datetime.datetime.now().isoformat() + '] ' +
-              msg, **print_options)
+        logging.info("[" + datetime.datetime.now().isoformat() + "] " + msg)
 
 
 async def main():
