@@ -200,7 +200,11 @@ async def main():
             fid = await aioconsole.ainput('> ')
             if len(fid) == 0:
                 break
-            print((await client.find_user(fid))['nickname'])
+            try:
+                print((await client.find_user(fid))['nickname'])
+            except Exception as e:
+                print(type(e))
+                print(e.args)
         await client.close()
     except Exception as e:
         print(type(e))
