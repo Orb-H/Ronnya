@@ -28,6 +28,23 @@ class WebSocketClientError(Exception):
         return self.data[key]
 
 
+class WebSocketClientInitError(WebSocketClientError):
+    def __init__(self, message: str, *args: object):
+        super().__init__(message, True, None, *args)
+
+
+class WebSocketClientLoginError(WebSocketClientError):
+    def __init__(self, message: str, login_info: dict, *args: object):
+        super().__init__(message, True, {"login_info": login_info}, *args)
+
+
+class WebSocketClientFindUserError(WebSocketClientError):
+    def __init__(self, message: str, login_info: dict, user_info: dict, *args: object):
+        super().__init__(
+            message, False, {"login_info": login_info, "user_info": user_info}, *args
+        )
+
+
 class WebSocketClient:
     class HeatbeatTimer:
         def __init__(self, func, log):
