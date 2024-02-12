@@ -12,6 +12,22 @@ import threading
 import getData
 
 
+class WebSocketClientError(Exception):
+    def __init__(
+        self, message: str, is_critical: bool, data: dict | None, *args: object
+    ):
+        super().__init__(*args)
+        self.message: str = message
+        self.is_critical: bool = is_critical
+        self.data: dict = data if data is not None else {}
+
+    def __str__(self) -> str:
+        return self.message
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+
 class WebSocketClient:
     class HeatbeatTimer:
         def __init__(self, func, log):
