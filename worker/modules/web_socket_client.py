@@ -72,7 +72,8 @@ class WebSocketClient:
         self.index = 1
         self.lock = threading.Lock()
 
-        assert not os.path.isfile('.ws_client.lock'), 'Other instance already running...'
+        if os.path.isfile(".ws_client.lock"):
+            raise WebSocketClientInitError("Other instance already running...")
 
         self.file = open('.ws_client.lock', 'w')
 
