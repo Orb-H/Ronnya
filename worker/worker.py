@@ -11,10 +11,11 @@ TODO:
 import os
 import zmq
 import logging
-import sys
 import asyncio
-from modules import web_socket_client
 from random import randint
+import sys
+from wspkg import web_socket_client
+
 
 SV_ROUTER_BACK = "tcp://localhost:5556"
 LRU_READY = "\x01"
@@ -38,6 +39,7 @@ def info_to_str(info: dict):
     return str(post_info)
 
 async def main():
+    
     #작혼 서버 연결
     try:
         #TODO : 임시로 등록. 나중에 환경변수화 예정
@@ -51,8 +53,9 @@ async def main():
         await client.connect()
         await client.login(token, uid, 8)
         logging.info("mahjong server connection succeed")
-    except:
+    except Exception as e:
         logging.critical("mahjong server connection failed")
+        logging.critical(e)
         sys.exit(0)
     #zmq 소켓 설정 및 connect
     try:

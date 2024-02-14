@@ -1,17 +1,23 @@
 import asyncio
 import aioconsole
 import websockets
-import lq_proto_util
-import lq_proto_pb2
 import datetime
 import os
 import uuid
 import logging
-
 import threading
 
-import getData
+#############################################################
+#default
+from . import getData
+from . import lq_proto_util
+from . import lq_proto_pb2
 
+#for debugging mode(use main function)
+# import lq_proto_util
+# import lq_proto_pb2
+# import getData
+#############################################################
 
 LANG = 'jp'
 
