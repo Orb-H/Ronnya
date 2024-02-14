@@ -207,15 +207,23 @@ class WebSocketClient:
         # INFO_QUERY: searchAccountByPattern -> fetchMultiAccountBrief
         self.log('Send SearchAccountByPattern')
         response = await self.send_searchaccountbypattern_msg(fid)
-        assert response['decode_id'] != 0, 'No account found'
+
+        user_info = {
+            "fid": fid
+        }
+
+        if response['decode_id'] == 0:
+            raise WebSocketClientFindUserError('No account found', self.login_info, user_info)
         uid = response['decode_id']
+        user_info['uid'] = uid
         self.log('Done SearchAccountByPattern: decode_id = ' + str(uid))
 
         self.log('Send FetchMultiAccountBrief')
         response = await self.send_fetchmultiaccountbrief_msg(uid)
-        assert 'players' in response, 'No user information found'
-        self.log('Done FetchMultiAccountBrief: user information ↓')
 
+        if 'players' not in response.keys():
+            raise WebSocketClientFindUserError('No user information found', self.login_info, user_info)
+        self.log('Done FetchMultiAccountBrief: user information ↓')
 
         info = response['players'][0]
         self.log(str(info))
