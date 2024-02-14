@@ -153,23 +153,40 @@ class WebSocketClient:
         code = getData.GetToken(uid, token)['accessToken']
         version = getData.GetVersion()['version']
         version_str = 'web-' + '.'.join(version.split('.')[:-1])
-        
+
+        self.login_info = {
+            "token": token,
+            "type": login_type,
+            "code": code,
+            "uid": uid,
+            "client_version_string": version_str,
+        }
+
         self.log('Send Oauth2Auth')
         response = await self.send_oauth2auth_msg(8, code, uid, version_str)
-        assert 'access_token' in response.keys(), 'Oauth2Auth Failed'
+
+        if 'access_token' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Auth Failed', self.login_info)
         access_token = response['access_token']
+        self.login_info['access_token'] = access_token
         self.log('Done Oauth2Auth: access_token = ' + access_token)
 
         self.log('Send Oauth2Check')
         response = await self.send_oauth2check_msg(login_type, access_token)
-        assert 'has_account' in response.keys(), 'Oauth2Check Failed'
+
+        if 'has_account' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Check Failed', self.login_info)
         has_account = response['has_account']
         self.log('Done Oauth2Check: has_account = ' + str(has_account))
-        assert has_account, ('No account found with uid ' + uid)
+
+        if not has_account:
+            raise WebSocketClientLoginError('No account found with given uid', self.login_info)
 
         self.log('Send Oauth2Login')
         response = await self.send_oauth2login_msg(login_type, access_token, version, version_str)
-        assert 'account_id' in response.keys(), 'Oauth2Login Failed'
+
+        if 'account_id' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Login Failed', self.login_info)
 
         self.log('Done Oauth2Login')
 
