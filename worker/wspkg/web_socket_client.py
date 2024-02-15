@@ -6,6 +6,7 @@ import os
 import uuid
 import logging
 import threading
+from typing import Dict, Union
 
 #############################################################
 #default
@@ -23,7 +24,7 @@ LANG = "jp"
 
 class WebSocketClientError(Exception):
     def __init__(
-        self, message: str, is_critical: bool, data: dict | None, *args: object
+        self, message: str, is_critical: bool, data: Union[Dict, None], *args: object
     ):
         super().__init__(*args)
         self.message: str = message
