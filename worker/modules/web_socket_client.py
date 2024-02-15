@@ -13,7 +13,38 @@ import threading
 import getData
 
 
-LANG = "jp"
+class WebSocketClientError(Exception):
+    def __init__(
+        self, message: str, is_critical: bool, data: dict | None, *args: object
+    ):
+        super().__init__(*args)
+        self.message: str = message
+        self.is_critical: bool = is_critical
+        self.data: dict = data if data is not None else {}
+
+    def __str__(self) -> str:
+        return self.message
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+
+class WebSocketClientInitError(WebSocketClientError):
+    def __init__(self, message: str, *args: object):
+        super().__init__(message, True, None, *args)
+
+
+class WebSocketClientLoginError(WebSocketClientError):
+    def __init__(self, message: str, login_info: dict, *args: object):
+        super().__init__(message, True, {"login_info": login_info}, *args)
+
+
+class WebSocketClientFindUserError(WebSocketClientError):
+    def __init__(self, message: str, login_info: dict, user_info: dict, *args: object):
+        super().__init__(
+            message, False, {"login_info": login_info, "user_info": user_info}, *args
+        )
+
 
 
 class WebSocketClient:
@@ -43,9 +74,8 @@ class WebSocketClient:
         self.index = 1
         self.lock = threading.Lock()
 
-        assert not os.path.isfile(
-            ".ws_client.lock"
-        ), "Other instance already running..."
+        if os.path.isfile(".ws_client.lock"):
+            raise WebSocketClientInitError("Other instance already running...")
 
         self.file = open(".ws_client.lock", "w")
 
@@ -132,28 +162,45 @@ class WebSocketClient:
 
     async def login(self, token: str, uid: str, login_type: int) -> bool:
         # LOGIN: OAuth2Auth -> OAuth2Check -> OAuth2Login
-        code = getData.GetToken(uid, token)["accessToken"]
-        version = getData.GetVersion()["version"]
-        version_str = "web-" + ".".join(version.split(".")[:-1])
+        code = getData.GetToken(uid, token)['accessToken']
+        version = getData.GetVersion()['version']
+        version_str = 'web-' + '.'.join(version.split('.')[:-1])
 
-        self.log("Send Oauth2Auth")
+        self.login_info = {
+            "token": token,
+            "type": login_type,
+            "code": code,
+            "uid": uid,
+            "client_version_string": version_str,
+        }
+
+        self.log('Send Oauth2Auth')
         response = await self.send_oauth2auth_msg(8, code, uid, version_str)
-        assert "access_token" in response.keys(), "Oauth2Auth Failed"
-        access_token = response["access_token"]
-        self.log("Done Oauth2Auth: access_token = " + access_token)
+
+        if 'access_token' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Auth Failed', self.login_info)
+        access_token = response['access_token']
+        self.login_info['access_token'] = access_token
+        self.log('Done Oauth2Auth: access_token = ' + access_token)
+
 
         self.log("Send Oauth2Check")
         response = await self.send_oauth2check_msg(login_type, access_token)
-        assert "has_account" in response.keys(), "Oauth2Check Failed"
-        has_account = response["has_account"]
-        self.log("Done Oauth2Check: has_account = " + str(has_account))
-        assert has_account, "No account found with uid " + uid
 
-        self.log("Send Oauth2Login")
-        response = await self.send_oauth2login_msg(
-            login_type, access_token, version, version_str
-        )
-        assert "account_id" in response.keys(), "Oauth2Login Failed"
+        if 'has_account' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Check Failed', self.login_info)
+        has_account = response['has_account']
+        self.log('Done Oauth2Check: has_account = ' + str(has_account))
+
+        if not has_account:
+            raise WebSocketClientLoginError('No account found with given uid', self.login_info)
+
+        self.log('Send Oauth2Login')
+        response = await self.send_oauth2login_msg(login_type, access_token, version, version_str)
+
+        if 'account_id' not in response.keys():
+            raise WebSocketClientLoginError('Oauth2Login Failed', self.login_info)
+
 
         self.log("Done Oauth2Login")
 
@@ -173,16 +220,27 @@ class WebSocketClient:
         # INFO_QUERY: searchAccountByPattern -> fetchMultiAccountBrief
         self.log("Send SearchAccountByPattern")
         response = await self.send_searchaccountbypattern_msg(fid)
-        assert response["decode_id"] != 0, "No account found"
-        uid = response["decode_id"]
-        self.log("Done SearchAccountByPattern: decode_id = " + str(uid))
+
+        user_info = {
+            "fid": fid
+        }
+
+        if response['decode_id'] == 0:
+            raise WebSocketClientFindUserError('No account found', self.login_info, user_info)
+        uid = response['decode_id']
+        user_info['uid'] = uid
+        self.log('Done SearchAccountByPattern: decode_id = ' + str(uid))
+
 
         self.log("Send FetchMultiAccountBrief")
         response = await self.send_fetchmultiaccountbrief_msg(uid)
-        assert "players" in response, "No user information found"
-        self.log("Done FetchMultiAccountBrief: user information ↓")
 
-        info = response["players"][0]
+        if 'players' not in response.keys():
+            raise WebSocketClientFindUserError('No user information found', self.login_info, user_info)
+        self.log('Done FetchMultiAccountBrief: user information ↓')
+
+        info = response['players'][0]
+
         self.log(str(info))
         return info
 
