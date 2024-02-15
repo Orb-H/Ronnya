@@ -20,7 +20,7 @@ if not os.environ.get('IN_CONTAINER'):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
 
-SV_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
+ZMQ_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)
@@ -40,6 +40,6 @@ if __name__=="__main__":
     #zmq socket 선언 후 연결
     context = zmq.Context()
     client = context.socket(zmq.REQ)
-    client.connect(SV_ROUTER_FRONT)
+    client.connect(ZMQ_ROUTER_FRONT)
     
     app.run(host="0.0.0.0", port=5000) #플라스크 서버 구동
