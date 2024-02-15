@@ -12,6 +12,8 @@ import threading
 
 import getData
 
+LANG = "jp"
+
 
 class WebSocketClientError(Exception):
     def __init__(
