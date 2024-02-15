@@ -20,7 +20,7 @@ if not os.environ.get('IN_CONTAINER'):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
 
-SV_ROUTER_FRONT = os.environ["ZMQ_ROUTER_FRONT"]
+SV_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)

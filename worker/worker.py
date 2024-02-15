@@ -21,7 +21,7 @@ if not os.environ.get('IN_CONTAINER'):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
 
-ZMQ_ROUTER_BACK = os.environ["ZMQ_ROUTER_BACK"]
+ZMQ_ROUTER_BACK = os.getenv("ZMQ_ROUTER_BACK")
 LRU_READY = "\x01"
 
 def info_to_str(info: dict):
