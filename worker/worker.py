@@ -16,8 +16,12 @@ from random import randint
 import sys
 from wspkg import web_socket_client
 
+if not os.environ.get('IN_CONTAINER'):
+    from dotenv import load_dotenv
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
 
-SV_ROUTER_BACK = "tcp://localhost:5556"
+ZMQ_ROUTER_BACK = os.environ["ZMQ_ROUTER_BACK"]
 LRU_READY = "\x01"
 
 def info_to_str(info: dict):
@@ -63,7 +67,7 @@ async def main():
         worker = context.socket(zmq.REQ)
         identity = "%04X-%04X" % (randint(0, 0x10000), randint(0,0x10000))
         worker.setsockopt_string(zmq.IDENTITY, identity)
-        worker.connect(SV_ROUTER_BACK)
+        worker.connect(ZMQ_ROUTER_BACK)
         worker.send_string(LRU_READY) #worker 등록
         logging.info("zmq connection succeed")
     except:

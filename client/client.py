@@ -13,8 +13,14 @@ TODO:
 '''
 from flask import Flask
 import zmq
+import os
 
-SV_ROUTER_FRONT = "tcp://localhost:5555"
+if not os.environ.get('IN_CONTAINER'):
+    from dotenv import load_dotenv
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
+
+SV_ROUTER_FRONT = os.environ["ZMQ_ROUTER_FRONT"]
 REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)

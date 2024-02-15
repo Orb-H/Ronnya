@@ -9,9 +9,16 @@ TODO:
 '''
 
 import zmq
+import os
 
-SV_ROUTER_FRONT = "tcp://*:5555"
-SV_ROUTER_BACK = "tcp://*:5556"
+if not os.environ.get('IN_CONTAINER'):
+    from dotenv import load_dotenv
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
+
+ZMQ_ROUTER_FRONT = os.environ["ZMQ_ROUTER_FRONT"]
+ZMQ_ROUTER_BACK = os.environ["ZMQ_ROUTER_BACK"]
+
 LRU_READY = "\x01"
 
 if __name__ == "__main__":
@@ -19,8 +26,8 @@ if __name__ == "__main__":
     context = zmq.Context(1)
     frontend = context.socket(zmq.ROUTER)
     backend = context.socket(zmq.ROUTER)
-    frontend.bind(SV_ROUTER_FRONT)
-    backend.bind(SV_ROUTER_BACK)
+    frontend.bind(ZMQ_ROUTER_FRONT)
+    backend.bind(ZMQ_ROUTER_BACK)
 
     #worker 초기 등록을 위한 Poller 선언
     poll_workers = zmq.Poller()
