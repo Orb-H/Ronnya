@@ -43,15 +43,16 @@ def info_to_str(info: dict):
     return str(post_info)
 
 async def main():
-    
+    logging.basicConfig(level=logging.INFO)
     #작혼 서버 연결
     try:
         #TODO : 임시로 등록. 나중에 환경변수화 예정
         #worker의 uid, token, 서버 주소 가져와야함
         #TODO : 임시로 등록. 나중에 환경변수화 예정
 
-        uid = os.getenv('ronnya_uid')
-        token = os.getenv('ronnya_token')
+        uid = os.getenv('RONNYA_UID')
+        token = os.getenv('RONNYA_TOKEN')
+        
 
         client = web_socket_client.WebSocketClient()
         await client.connect()
@@ -73,7 +74,7 @@ async def main():
     except:
         logging.critical("zmq connection failed")
         sys.exit(0)
-    print("worker on")
+    print(f"worker on. ID:{identity}")
     while True:
         msg = worker.recv_multipart() #데이터 수신
         if not msg:
