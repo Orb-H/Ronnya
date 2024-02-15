@@ -1,7 +1,15 @@
-import lq_proto_pb2
 import json
 
-lq = json.loads(''.join(open('data/lq_proto.json').readlines()))['nested']
+#############################################################
+#default
+from . import lq_proto_pb2
+lq = json.loads(''.join(open('wspkg/data/lq_proto.json').readlines()))['nested']
+
+#for debugging mode(use main function in web_socket_client.py)
+#import lq_proto_pb2
+#lq = json.loads(''.join(open('data/lq_proto.json').readlines()))['nested']
+#############################################################
+
 lq = lq['lq']['nested']
 fasttest = lq['FastTest']
 lobby = lq['Lobby']
