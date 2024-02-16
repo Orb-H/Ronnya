@@ -15,11 +15,12 @@ import asyncio
 from random import randint
 import sys
 from wspkg import web_socket_client
-
+print("what")
 if not os.environ.get('IN_CONTAINER'):
+    print("in container")
     from dotenv import load_dotenv
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
+    load_dotenv(os.path.join(BASE_DIR, ".env.worker.dev"))
 
 ZMQ_ROUTER_BACK = os.getenv("ZMQ_ROUTER_BACK")
 LRU_READY = "\x01"

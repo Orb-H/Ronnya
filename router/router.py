@@ -15,7 +15,7 @@ import logging
 if not os.environ.get('IN_CONTAINER'):
     from dotenv import load_dotenv
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
+    load_dotenv(os.path.join(BASE_DIR, ".env.router.dev"))
 
 ZMQ_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 ZMQ_ROUTER_BACK = os.getenv("ZMQ_ROUTER_BACK")
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
         if socks.get(frontend) == zmq.POLLIN:
             #  Get client request, route to first available worker
-            logging.INFO("front attached")
+            logging.info("front attached")
             msg = frontend.recv_multipart()
             request = [workers.pop(0), ''.encode()] + msg
             backend.send_multipart(request)

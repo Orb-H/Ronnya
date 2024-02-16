@@ -18,7 +18,7 @@ import os
 if not os.environ.get('IN_CONTAINER'):
     from dotenv import load_dotenv
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    load_dotenv(os.path.join(BASE_DIR, ".env.dev"))
+    load_dotenv(os.path.join(BASE_DIR, ".env.client.dev"))
 
 ZMQ_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 REQUEST_TIMEOUT = 3000
