@@ -15,9 +15,14 @@ import asyncio
 from random import randint
 import sys
 from wspkg import web_socket_client
+print("what")
+if not os.environ.get('IN_CONTAINER'):
+    print("in container")
+    from dotenv import load_dotenv
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(os.path.join(BASE_DIR, ".env.worker.dev"))
 
-
-SV_ROUTER_BACK = "tcp://localhost:5556"
+ZMQ_ROUTER_BACK = os.getenv("ZMQ_ROUTER_BACK")
 LRU_READY = "\x01"
 
 def info_to_str(info: dict):
@@ -39,15 +44,16 @@ def info_to_str(info: dict):
     return str(post_info)
 
 async def main():
-    
+    logging.basicConfig(level=logging.INFO)
     #작혼 서버 연결
     try:
         #TODO : 임시로 등록. 나중에 환경변수화 예정
         #worker의 uid, token, 서버 주소 가져와야함
         #TODO : 임시로 등록. 나중에 환경변수화 예정
 
-        uid = os.getenv('ronnya_uid')
-        token = os.getenv('ronnya_token')
+        uid = os.getenv('RONNYA_UID')
+        token = os.getenv('RONNYA_TOKEN')
+        
 
         client = web_socket_client.WebSocketClient()
         await client.connect()
@@ -63,13 +69,13 @@ async def main():
         worker = context.socket(zmq.REQ)
         identity = "%04X-%04X" % (randint(0, 0x10000), randint(0,0x10000))
         worker.setsockopt_string(zmq.IDENTITY, identity)
-        worker.connect(SV_ROUTER_BACK)
+        worker.connect(ZMQ_ROUTER_BACK)
         worker.send_string(LRU_READY) #worker 등록
         logging.info("zmq connection succeed")
     except:
         logging.critical("zmq connection failed")
         sys.exit(0)
-    print("worker on")
+    print(f"worker on. ID:{identity}")
     while True:
         msg = worker.recv_multipart() #데이터 수신
         if not msg:

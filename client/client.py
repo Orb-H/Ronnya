@@ -13,8 +13,14 @@ TODO:
 '''
 from flask import Flask
 import zmq
+import os
 
-SV_ROUTER_FRONT = "tcp://localhost:5555"
+if not os.environ.get('IN_CONTAINER'):
+    from dotenv import load_dotenv
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(os.path.join(BASE_DIR, ".env.client.dev"))
+
+ZMQ_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)
@@ -34,6 +40,6 @@ if __name__=="__main__":
     #zmq socket 선언 후 연결
     context = zmq.Context()
     client = context.socket(zmq.REQ)
-    client.connect(SV_ROUTER_FRONT)
+    client.connect(ZMQ_ROUTER_FRONT)
     
     app.run(host="0.0.0.0", port=5000) #플라스크 서버 구동
