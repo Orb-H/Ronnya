@@ -10,7 +10,7 @@ Base = declarative_base()
 
 
 class UserInfo(Base):
-    __tablename__ = "user_info"
+    __abstract__ = True
 
     fid = Column(String(10), nullable=False, primary_key=True)
     uid = Column(String(10), nullable=False)
@@ -20,3 +20,9 @@ class UserInfo(Base):
     rank3 = Column(Integer, nullable=False)
     point3 = Column(Integer, nullable=False)
     last_update = Column(DateTime, nullable=False)
+
+class UserInfoUS(UserInfo):
+    __tablename__ = "user_info_us"
+
+class UserInfoJP(UserInfo):
+    __tablename__ = "user_info_jp"
