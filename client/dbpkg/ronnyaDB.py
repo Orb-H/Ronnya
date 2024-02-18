@@ -57,3 +57,26 @@ class RonnyaDB:
 
     def log(self, msg: str) -> None:
         logging.info("[" + datetime.now().isoformat() + "] " + msg)
+
+
+def main():
+    print("----- Manual mode -----")
+    r = RonnyaDB()
+
+    while True:
+        print("> ", end="")
+        cmd = input().strip().split()
+        if len(cmd) == 0:
+            continue
+        if cmd[0] == "stop":
+            break
+        elif cmd[0] == "read":
+            print(r.read_data(str(cmd[1])))
+        elif cmd[0] == "update":
+            r.update_data(str(cmd[1]), json.loads(cmd[2]))
+        else:
+            print("No such command: " + cmd[0])
+
+
+if __name__ == "__main__":
+    main()
