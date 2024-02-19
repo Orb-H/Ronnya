@@ -87,9 +87,9 @@ def main():
         if cmd[0] == "stop":
             break
         elif cmd[0] == "read":
-            print(r.read_data(str(cmd[1])))
+            print(r.read_data(str(cmd[1]), str(cmd[2])))
         elif cmd[0] == "update":
-            r.update_data(str(cmd[1]), json.loads(cmd[2]))
+            r.update_data(str(cmd[1]), json.loads(cmd[3]), str(cmd[2]))
         else:
             print("No such command: " + cmd[0])
 
