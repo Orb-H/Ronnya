@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 import json
 
-from .models import UserInfo, Base
+from models import Base, UserInfoJP, UserInfoUS
 
 DB_URL = f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?charset=utf8mb4&collation=utf8mb4_general_ci"
 
@@ -20,8 +20,17 @@ class RonnyaDB:
 
         self.log("DB Initialization done.")
 
-    def read_data(self, fid: str) -> dict | None:
-        self.log("(FID: " + fid + ") Checking existence in DB...")
+    def read_data(self, fid: str, server: str) -> dict | None:
+        self.log(
+            "(FID: " + fid + ", server: " + server + ") Checking existence in DB..."
+        )
+
+        if server == "jp":
+            UserInfo = UserInfoJP
+        elif server == "us":
+            UserInfo = UserInfoUS
+        else:
+            raise ValueError("Invalid server")
 
         with self.sessionmaker() as session:
             result = session.query(UserInfo).filter(UserInfo.fid == fid).first()
@@ -33,9 +42,16 @@ class RonnyaDB:
                 self.log("(FID: " + fid + ") Not found.")
                 return None
 
-    def update_data(self, fid: str, data: dict) -> None:
-        self.log("(FID: " + fid + ") Updating data...")
+    def update_data(self, fid: str, data: dict, server: str) -> None:
+        self.log("(FID: " + fid + ", server: " + server + ") Updating data...")
         data.update({"fid": fid, "last_update": datetime.now()})
+
+        if server == "jp":
+            UserInfo = UserInfoJP
+        elif server == "us":
+            UserInfo = UserInfoUS
+        else:
+            raise ValueError("Invalid server")
 
         with self.sessionmaker() as session:
             exist = (
