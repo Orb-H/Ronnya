@@ -25,13 +25,13 @@ REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)
 
-@app.route('/request/<uid>')
-def handle_uid(uid):
+@app.route('/request/<fid>')
+def handle_fid(fid):
     '''
-    uid를 받아서 zmq통신 후 결과 반환
+    fid를 받아서 zmq통신 후 결과 반환
     '''
     global client
-    client.send_string(str(uid)) #uid 정보 송신
+    client.send_string(str(fid)) #fid 정보 송신
     if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0: #정보 수신
         reply = client.recv()
         return reply
