@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 import json
 
-from models import Base, UserInfoJP, UserInfoUS
+from .models import Base, UserInfoJP, UserInfoUS
 
 DB_URL = f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?charset=utf8mb4&collation=utf8mb4_general_ci"
 
