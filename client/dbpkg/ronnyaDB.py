@@ -71,6 +71,18 @@ class RonnyaDB:
 
         self.log("(FID: " + fid + ") Data updated.")
 
+    @staticmethod
+    def ws_to_db(data: dict) -> dict:
+        result = {
+            "uid": data["account_id"],
+            "name": data["nickname"],
+            "rank4": data["level"]["id"],
+            "score4": data["level"]["score"],
+            "rank3": data["level3"]["id"],
+            "score3": data["level3"]["score"],
+        }
+        return result
+
     def log(self, msg: str) -> None:
         logging.info("[" + datetime.now().isoformat() + "] " + msg)
 
