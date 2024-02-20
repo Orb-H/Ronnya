@@ -25,8 +25,8 @@ REQUEST_TIMEOUT = 3000
 
 app = Flask(__name__)
 
-@app.route('/request/<fid>')
-def handle_fid(fid):
+@app.route('/request/<server>/<fid>')
+def handle_fid(server, fid):
     '''
     fid를 받아서 zmq통신 후 결과 반환
     '''
