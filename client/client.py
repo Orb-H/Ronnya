@@ -14,6 +14,9 @@ TODO:
 from flask import Flask
 import zmq
 import os
+import datetime
+
+from dbpkg.ronnyaDB import RonnyaDB
 
 if not os.environ.get('IN_CONTAINER'):
     from dotenv import load_dotenv
@@ -30,11 +33,26 @@ def handle_fid(server, fid):
     '''
     fid를 받아서 zmq통신 후 결과 반환
     '''
-    global client
-    client.send_string(str(fid)) #fid 정보 송신
+    global client, ronnyadb
+
+    current_data = ronnyadb.read_data(fid, server)
+    if current_data != None:
+        if (datetime.datetime.now() - current_data["last_update"]).total_seconds() < 600: # 10분, 추후 확정하면 수정
+            current_data.pop("uid")
+            return current_data
+
+    client.send_string(str(fid)) # TODO: 서버 정보 추가해서 보내기
     if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0: #정보 수신
         reply = client.recv()
-        return reply
+
+        # TODO: reply를 dict 형태의 result로 변환하는 과정
+
+        result = RonnyaDB.ws_to_db(result)
+        ronnyadb.update_data(fid, result, server)
+        result.pop("uid")
+        return result
+    else:
+        return 500, "Server Operation Failed"
 
 if __name__=="__main__":
     #zmq socket 선언 후 연결
@@ -42,4 +60,6 @@ if __name__=="__main__":
     client = context.socket(zmq.REQ)
     client.connect(ZMQ_ROUTER_FRONT)
     
+    ronnyadb = RonnyaDB()
+
     app.run(host="0.0.0.0", port=5000) #플라스크 서버 구동
