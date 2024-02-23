@@ -20,7 +20,6 @@ from . import lq_proto_pb2
 # import lq_proto_pb2
 # import getData
 #############################################################
-LANG = "jp"
 
 
 class WebSocketClientError(Exception):
@@ -84,7 +83,8 @@ class WebSocketClient:
         JP = "jp"
         US = "us"
 
-    def __init__(self):
+    def __init__(self, server: TargetServer = TargetServer.JP):
+        self.server = server
         self.index = 1
         self.lock = threading.Lock()
 
@@ -95,7 +95,7 @@ class WebSocketClient:
 
     async def connect(self):
         self.client = await websockets.connect(
-            os.getenv("_".join(["ws_server_addr", LANG]))
+            os.getenv("_".join(["ws_server_addr_", self.server.value]))
         )
         self.ht = WebSocketClient.HeatbeatTimer(self.send_heatbeat, self.log)
         self.ht.start()
