@@ -7,6 +7,7 @@ import uuid
 import logging
 import threading
 from typing import Dict, Union
+from enum import StrEnum
 
 #############################################################
 #default
@@ -78,6 +79,10 @@ class WebSocketClient:
                 await asyncio.sleep(360)
                 await self.func()
                 self.log("Heatbeat sent\n> ", end="")
+
+    class TargetServer(StrEnum):
+        JP = "jp"
+        US = "us"
 
     def __init__(self):
         self.index = 1
