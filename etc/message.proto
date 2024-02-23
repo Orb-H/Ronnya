@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+enum Server {
+    JP = 0;
+    US = 1;
+}
+
+message Request {
+    string fid = 1;
+    Server server = 2;
+}
+
+message Response {
+    Error error = 1;
+    string fid = 2;
+    Server server = 3;
+    string uid = 4;
+    string name = 5;
+    uint32 rank4 = 6;
+    uint32 score4 = 7;
+    uint32 rank3 = 8;
+    uint32 score3 = 9;
+}
+
+message Error {
+    uint32 code = 1;
+    string message = 2;
+}
