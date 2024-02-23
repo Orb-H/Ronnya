@@ -6,6 +6,7 @@ import os
 import uuid
 import logging
 import threading
+import sys
 from typing import Dict, Union
 from enum import StrEnum
 
@@ -271,9 +272,15 @@ class WebSocketClient:
 async def main():
     print("----- Manual Mode -----")
     print("Enter fid to find user, leave blank to quit")
+
     try:
-        uid = os.getenv("_".join(["ronnya_uid", LANG]))
-        token = os.getenv("_".join(["ronnya_token", LANG]))
+        server = WebSocketClient.TargetServer(sys.argv[1] if len(sys.argv) > 1 else "jp")
+    except:
+        server = WebSocketClient.TargetServer.JP
+
+    try:
+        uid = os.getenv("_".join(["ronnya_uid", server]))
+        token = os.getenv("_".join(["ronnya_token", server]))
 
         client = WebSocketClient()
         print("Intialize connection")
