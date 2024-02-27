@@ -6,7 +6,9 @@ import os
 import uuid
 import logging
 import threading
+import sys
 from typing import Dict, Union
+from enum import StrEnum
 
 #############################################################
 #default
@@ -19,7 +21,6 @@ from . import lq_proto_pb2
 # import lq_proto_pb2
 # import getData
 #############################################################
-LANG = "jp"
 
 
 class WebSocketClientError(Exception):
@@ -79,7 +80,12 @@ class WebSocketClient:
                 await self.func()
                 self.log("Heatbeat sent\n> ", end="")
 
-    def __init__(self):
+    class TargetServer(StrEnum):
+        JP = "jp"
+        US = "us"
+
+    def __init__(self, server: TargetServer = TargetServer.JP):
+        self.server = server
         self.index = 1
         self.lock = threading.Lock()
 
@@ -90,7 +96,7 @@ class WebSocketClient:
 
     async def connect(self):
         self.client = await websockets.connect(
-            os.getenv("_".join(["ws_server_addr", LANG]))
+            os.getenv("_".join(["ws_server_addr_", self.server.value]))
         )
         self.ht = WebSocketClient.HeatbeatTimer(self.send_heatbeat, self.log)
         self.ht.start()
@@ -266,9 +272,15 @@ class WebSocketClient:
 async def main():
     print("----- Manual Mode -----")
     print("Enter fid to find user, leave blank to quit")
+
     try:
-        uid = os.getenv("_".join(["ronnya_uid", LANG]))
-        token = os.getenv("_".join(["ronnya_token", LANG]))
+        server = WebSocketClient.TargetServer(sys.argv[1] if len(sys.argv) > 1 else "jp")
+    except:
+        server = WebSocketClient.TargetServer.JP
+
+    try:
+        uid = os.getenv("_".join(["ronnya_uid", server]))
+        token = os.getenv("_".join(["ronnya_token", server]))
 
         client = WebSocketClient()
         print("Intialize connection")
