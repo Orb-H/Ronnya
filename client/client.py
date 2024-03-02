@@ -25,10 +25,11 @@ if not os.environ.get('IN_CONTAINER'):
 
 ZMQ_ROUTER_FRONT = os.getenv("ZMQ_ROUTER_FRONT")
 REQUEST_TIMEOUT = 3000
+SERVERS = ["jp", "us"]
 
 app = Flask(__name__)
 
-@app.route('/request/<server>/<fid>')
+@app.route("/request/<any(" + ",".join(SERVERS) + "):server>/<fid>")
 def handle_fid(server, fid):
     '''
     fid를 받아서 zmq통신 후 결과 반환
