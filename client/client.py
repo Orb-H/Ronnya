@@ -17,6 +17,7 @@ import os
 import datetime
 
 from dbpkg.ronnyaDB import RonnyaDB
+from proto import message_util
 
 if not os.environ.get('IN_CONTAINER'):
     from dotenv import load_dotenv
@@ -42,12 +43,13 @@ def handle_fid(server, fid):
             current_data.pop("uid")
             return current_data
 
-    client.send_string(str(fid)) # TODO: 서버 정보 추가해서 보내기
+    msg = message_util.wrap_request(fid, server) # TODO: test needed
+    client.send_string(msg)
+
     if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0: #정보 수신
         reply = client.recv()
 
-        # TODO: reply를 dict 형태의 result로 변환하는 과정
-
+        result = message_util.unwrap_response(reply) # TODO: test needed
         result = RonnyaDB.ws_to_db(result)
         ronnyadb.update_data(fid, result, server)
         result.pop("uid")
