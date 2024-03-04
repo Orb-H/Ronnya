@@ -7,7 +7,7 @@ version: '1.0'
 services:
   client:
     container_name: client
-    image: playjnj/ronnya_client:1.0
+    image: playjnj/ronnya_client_multiplatform:1.0
     ports:
       - "5000:5000"
     env_file:
@@ -17,12 +17,12 @@ services:
         condition: service_started #router가 복잡해지면 healthcheck 추가해야함
   router:
     container_name: router
-    image: playjnj/ronnya_router:1.0.2
+    image: playjnj/ronnya_router_multiplatform:1.0.2
     env_file:
       - ./config/.env.router.container
   worker:
     container_name: worker
-    image: playjnj/ronnya_worker:1.0
+    image: playjnj/ronnya_worker_multiplatform:1.0
     env_file:
       - ./config/.env.worker.container
     depends_on:
